@@ -8,31 +8,64 @@ import {
   faUser,
   faLock,
   faFile,
-  faMessage, faEye, faEyeSlash
+  faMessage, faExclamationCircle, faCheckCircle
 } from '@fortawesome/free-solid-svg-icons';
+import { loginUser } from "@/api/UsersApi";
+import { useRouter } from 'next/navigation';
 
 
 const LoginPage = () => {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+    const [modalType, setModalType] = useState(""); // "error" or "success"
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     document.title = "Login | AlayTrabaho";
-  }, []); 
+    console.log("Modal state changed:", isModalOpen);
+  }, [isModalOpen]); 
 
-  const [showPassword, setShowPassword] = useState(false);
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const handleSubmit = (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => setIsLoading(false), 1500);
+  
+    try {
+      const response = await loginUser({ email, password });
+      
+      console.log("Raw API Response:", response); // Debugging API response
+  
+      // ✅ Instead of checking `response.success`, check if `userId` exists
+      if (response?.userId) { 
+        // Store user details
+        localStorage.setItem("user", JSON.stringify(response));
+  
+        // Redirect to dashboard
+        router.push("../userPages/dashboard");
+      } else {
+        showModal("Please fill in all required fields.", "error");
+        return;
+      }
+    } catch (error: any) { 
+      showModal("Login failed, please check your credentials.", "error");
+      return;
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const showModal = (message: string, type: "error" | "success") => {
+    setModalMessage(message);
+    setModalType(type);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100  flex flex-col overflow-hidden relative">
@@ -106,23 +139,14 @@ const LoginPage = () => {
                   className="text-gray-400 absolute left-3 top-3 group-hover:text-blue-500 transition-colors duration-300"
                 />
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type="password"
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-3 border-2 border-gray-200 rounded-lg focus:outline-none
-                          focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white
-                          placeholder-gray-400 text-gray-700"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none
+                           focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white
+                           placeholder-gray-400 text-gray-700"
                 />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-blue-500 transition-colors duration-300"
-                >
-                  <FontAwesomeIcon 
-                    icon={showPassword ? faEyeSlash : faEye}
-                  />
-                </button>
               </div>
  
 
@@ -157,6 +181,21 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
+      {/* Modal Component */}
+            {isModalOpen && (
+              <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm">
+                  <FontAwesomeIcon
+                    icon={modalType === "error" ? faExclamationCircle : faCheckCircle}
+                    className={`text-4xl ${modalType === "error" ? "text-red-500" : "text-green-500"} mb-4`}
+                  />
+                  <p className="text-gray-800 mb-4">{modalMessage}</p>
+                  <button onClick={closeModal} className="btn-submit">
+                    OK
+                  </button>
+                </div>
+              </div>
+            )}
     </div>
   );
 };
