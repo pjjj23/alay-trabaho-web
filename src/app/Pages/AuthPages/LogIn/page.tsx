@@ -8,7 +8,7 @@ import {
   faUser,
   faLock,
   faFile,
-  faMessage
+  faMessage, faEye, faEyeSlash
 } from '@fortawesome/free-solid-svg-icons';
 
 
@@ -20,6 +20,12 @@ const LoginPage = () => {
   useEffect(() => {
     document.title = "Login | AlayTrabaho";
   }, []); 
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   const handleSubmit = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
@@ -100,21 +106,25 @@ const LoginPage = () => {
                   className="text-gray-400 absolute left-3 top-3 group-hover:text-blue-500 transition-colors duration-300"
                 />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none
-                           focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white
-                           placeholder-gray-400 text-gray-700"
+                  className="w-full pl-10 pr-12 py-3 border-2 border-gray-200 rounded-lg focus:outline-none
+                          focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white
+                          placeholder-gray-400 text-gray-700"
                 />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-3 text-gray-400 hover:text-blue-500 transition-colors duration-300"
+                >
+                  <FontAwesomeIcon 
+                    icon={showPassword ? faEyeSlash : faEye}
+                  />
+                </button>
               </div>
-
-              <div className="text-right">
-                <a href="../AuthPages/ForgotPassword" className="text-blue-500 text-sm hover:text-blue-700 transition-colors duration-300">
-                  Forgot Password?
-                </a>
-              </div>
+ 
 
               <button
                 type="submit"

@@ -94,11 +94,11 @@ const JobCard = ({ colorScheme }) => {
             <span className="text-sm">Sto Niño, Cebu City</span>
           </div>
 
-          <button 
+          <a href="../adminPages/JobInfo"><button 
             className="px-8 py-2 rounded-full text-sm font-medium bg-gray-800 text-white hover:bg-gray-700"
           >
             Details
-          </button>
+          </button></a>
         </div>
       </div>
     </div>
@@ -501,12 +501,7 @@ const JobListings = () => {
                     <a href="../adminPages/adminSettings"><button className="w-full px-4 py-2 text-left hover:bg-gray-700 flex items-center gap-2">
                       <FontAwesomeIcon icon={faUser} className="w-4 h-4 text-white" />
                        <span className="text-white">Profile</span> 
-                    </button></a>
-                    
-                    <a href="../userPages/ManageJob"><button className="w-full px-4 py-2 text-left hover:bg-gray-700 flex items-center gap-2">
-                      <FontAwesomeIcon icon={faLocationDot} className="w-4 h-4 text-white" />
-                      <span className="text-white">Manage Job Applied</span>
-                    </button></a>
+                    </button></a> 
                     
                     <div className="border-t border-gray-200 my-1"></div>
                     

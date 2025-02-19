@@ -1,27 +1,24 @@
 "use client";
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faHome, 
   faUser, 
   faLocationDot, 
   faRightFromBracket,
-  faPencil,
-  faCheck,
-  faTimes,
-  faCamera
+  faDownload
 } from '@fortawesome/free-solid-svg-icons';
 
 const ProfileCard = () => { 
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [profileImage, setProfileImage] = useState("/assets/img/default-profileimg.png");
-  const fileInputRef = useRef(null);
+
   useEffect(() => {
     document.title = "Admin Profile | AlayTrabaho";
   }, []);
-  const [formData, setFormData] = useState({
+
+  const formData = {
     name: 'Juan Dela Cruz',
     profession: 'Software Developer',
     birthday: 'May 05, 2000',
@@ -39,34 +36,11 @@ const ProfileCard = () => {
     Suspendisse tempor sagittis sodales. Interdum et malesuada fames ac ante ipsum primis in faucibus. Aliquam quis sodales est, 
     ut facilisis eros. Praesent faucibus ex vitae tellus convallis, eu volutpat massa tempus. Donec commodo tortor vitae turpis ultrices, 
     sit amet tempor quam malesuada libero, vel porta purus augue viverra turpis. Sed cursus lacus et laculis rhoncus.`
-  });
-
-  const [tempData, setTempData] = useState({ ...formData });
-
-  const handleEdit = () => {
-    setIsEditing(true);
-    setTempData({ ...formData });
   };
 
-  const handleSave = () => {
-    setFormData({ ...tempData });
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setTempData({ ...formData });
-    setIsEditing(false);
-  };
-
-  const handleImageChange = (event: { target: { files: any[]; }; }) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleDownloadCV = () => {
+    // Add CV download logic here
+    console.log('Downloading CV...');
   };
 
   const LogoutModal = () => (
@@ -96,31 +70,13 @@ const ProfileCard = () => {
     </div>
   );
 
-  const ProfileField = ({ label, value, field, editable = true }) => {
+  const ProfileField = ({ label, value }) => {
     return (
       <div className="transition-all duration-200 hover:bg-gray-50 p-3 rounded-lg">
         <div className="text-gray-600 text-sm">{label}:</div>
-        {isEditing && editable ? (
-          field === 'bio' ? (
-            <textarea
-              value={tempData[field]}
-              onChange={(e) => setTempData({ ...tempData, [field]: e.target.value })}
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent mt-1 text-sm"
-              rows={8}
-            />
-          ) : (
-            <input
-              type="text"
-              value={tempData[field]}
-              onChange={(e) => setTempData({ ...tempData, [field]: e.target.value })}
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent mt-1"
-            />
-          )
-        ) : (
-          <div className={`${field === 'bio' ? 'text-gray-700 text-sm leading-relaxed' : ''}`}>
-            {value}
-          </div>
-        )}
+        <div className={`${label === 'Bio' ? 'text-gray-700 text-sm leading-relaxed' : ''}`}>
+          {value}
+        </div>
       </div>
     );
   };
@@ -166,7 +122,12 @@ const ProfileCard = () => {
                   <FontAwesomeIcon icon={faUser} className="w-4 h-4 text-white" />
                   <span className="text-white">Profile</span> 
                 </button>
-              </a> 
+              </a>
+              
+              <a href="../userPages/ManageJob"><button className="w-full px-4 py-2 text-left hover:bg-gray-700 flex items-center gap-2">
+                              <FontAwesomeIcon icon={faLocationDot} className="w-4 h-4 text-white" />
+                              <span className="text-white">Manage Job Applied</span>
+                            </button></a>
               
               <div className="border-t border-gray-200 my-1"></div>
               
@@ -190,32 +151,6 @@ const ProfileCard = () => {
         <div className="bg-white rounded-lg p-6 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold">Profile</h2>
-            {!isEditing ? (
-              <button
-                onClick={handleEdit}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300"
-              >
-                <FontAwesomeIcon icon={faPencil} />
-                <span>Edit Profile</span>
-              </button>
-            ) : (
-              <div className="flex gap-2">
-                <button
-                  onClick={handleSave}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-300"
-                >
-                  <FontAwesomeIcon icon={faCheck} />
-                  <span>Save</span>
-                </button>
-                <button
-                  onClick={handleCancel}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-300"
-                >
-                  <FontAwesomeIcon icon={faTimes} />
-                  <span>Cancel</span>
-                </button>
-              </div>
-            )}
           </div>
           
           <div className="flex flex-col md:flex-row gap-6">
@@ -228,42 +163,36 @@ const ProfileCard = () => {
                   className="w-full h-full object-fit"
                 />
               </div>
-              {isEditing && (
-                <>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageChange}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="absolute bottom-2 right-2 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-all duration-300"
-                  >
-                    <FontAwesomeIcon icon={faCamera} className="w-4 h-4" />
-                  </button>
-                </>
-              )}
             </div>
 
             {/* Profile Information */}
             <div className="flex-1">
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <ProfileField label="Name" value={formData.name} field="name" />
-                  <ProfileField label="Profession" value={formData.profession} field="profession" />
-                  <ProfileField label="Birthday" value={formData.birthday} field="birthday" editable={false} />
-                  <ProfileField label="Role" value={formData.role} field="role" editable={false} />
-                  <ProfileField label="Contact Number" value={formData.contactNumber} field="contactNumber" />
-                  <ProfileField label="Address" value={formData.address} field="address" />
+                  <ProfileField label="Name" value={formData.name} />
+                  <ProfileField label="Profession" value={formData.profession} />
+                  <ProfileField label="Birthday" value={formData.birthday} />
+                  <ProfileField label="Role" value={formData.role} />
+                  <ProfileField label="Contact Number" value={formData.contactNumber} />
+                  <ProfileField label="Address" value={formData.address} />
                 </div>
 
                 <div className="mt-6">
-                  <ProfileField label="Bio" value={formData.bio} field="bio" />
+                  <ProfileField label="Bio" value={formData.bio} />
                 </div>
               </div>
             </div>
+          </div>
+          
+          {/* Download CV Button */}
+          <div className="flex justify-end mt-6">
+            <button
+              onClick={handleDownloadCV}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300"
+            >
+              <FontAwesomeIcon icon={faDownload} />
+              <span>Download CV</span>
+            </button>
           </div>
         </div>
       </div>

@@ -8,7 +8,7 @@ import {
   faPhone,
   faIdCard,
   faUserTag,
-  faEye
+  faEye, faEyeSlash
 } from '@fortawesome/free-solid-svg-icons';
 
 const SignupPage = () => {
@@ -27,6 +27,12 @@ const SignupPage = () => {
     document.title = "Sign Up | AlayTrabaho";
   }, []); 
 
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+  
   const handleChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -164,16 +170,31 @@ const SignupPage = () => {
                   icon={faLock} 
                   className="text-gray-400 absolute left-3 top-3 group-hover:text-blue-500 transition-colors duration-300"
                 />
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none
-                           focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white
-                           placeholder-gray-400 text-gray-700"
-                />
+                <div className="relative group">
+                  <FontAwesomeIcon 
+                    icon={faLock} 
+                    className="text-gray-400 absolute left-3 top-3 group-hover:text-blue-500 transition-colors duration-300"
+                  />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-12 py-3 border-2 border-gray-200 rounded-lg focus:outline-none
+                            focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white
+                            placeholder-gray-400 text-gray-700"
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-3 top-3 text-gray-400 hover:text-blue-500 transition-colors duration-300"
+                  >
+                    <FontAwesomeIcon 
+                      icon={showPassword ? faEyeSlash : faEye}
+                    />
+                  </button>
+                </div>
               </div>
 
               <div className="relative group">
