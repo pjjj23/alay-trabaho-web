@@ -86,13 +86,13 @@ export default function Home() {
                 </h1>
               </div>
               <div className="flex items-center gap-6">
-                <button className="px-6 py-2 text-gray-700 hover:text-blue-600 transition-all duration-300 relative group">
-                  <a href="Pages/AuthPages/LogIn"> Login </a> 
+              <a href="Pages/AuthPages/LogIn"><button className="px-6 py-2 text-gray-700 hover:text-blue-600 transition-all duration-300 relative group">
+                    Login  
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
-                </button>
-                <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-blue-300/50 transform hover:scale-105">
-                  <a href="Pages/AuthPages/SignUp"> Sign Up </a> 
-                </button>
+                </button></a> 
+                <a href="Pages/AuthPages/SignUp"> <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-blue-300/50 transform hover:scale-105">
+                   Sign Up  
+                </button></a> 
               </div>
             </div>
           </nav>
@@ -148,13 +148,13 @@ export default function Home() {
                 </p>
 
                 <div className="flex justify-center gap-4 mb-16">
-                  <button className="group px-8 py-3 bg-white text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center gap-2">
-                    <a href="Pages/AuthPages/LogIn">Login</a> 
+                <a href="Pages/AuthPages/LogIn"><button className="group px-8 py-3 bg-white text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center gap-2">
+                     Login 
                     <span className="transform transition-transform group-hover:translate-x-1">→</span>
-                  </button>
-                  <button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-blue-300/50 transform hover:scale-105 active:scale-95">
-                    <a href="Pages/AuthPages/SignUp"> Sign Up </a>
-                  </button>
+                  </button></a> 
+                  <a href="Pages/AuthPages/SignUp"><button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-blue-300/50 transform hover:scale-105 active:scale-95">
+                      Sign Up  
+                  </button></a>
                 </div>
               </div>
 
