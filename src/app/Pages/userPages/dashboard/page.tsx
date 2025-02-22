@@ -1,11 +1,22 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faLocationDot, faRightFromBracket, faHome } from '@fortawesome/free-solid-svg-icons';
-
+import { faUser, faLocationDot, faRightFromBracket, faHome } from '@fortawesome/free-solid-svg-icons'; 
+import { useRouter } from "next/navigation";
+ 
 const JobListingsPage = () => {
+  const [firstName, setFirstName] = useState<string | null>(null); 
+  const router = useRouter();
     useEffect(() => {
       document.title = "User Dashboard | AlayTrabaho";
+      const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      setFirstName(userData.firstName || "User"); // Default to "User" if firstName is missing
+    }
+    if (!storedUser) {
+      router.push("/Pages/AuthPages/LogIn"); // 🔥 Redirect to login page if no session
+    }
     }, []); 
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -14,6 +25,9 @@ const JobListingsPage = () => {
     experienceLevel: [],
     workSetup: []
   });
+
+   
+ 
 
   const jobListings = [
     {
@@ -111,7 +125,7 @@ const JobListingsPage = () => {
       <h3 className="text-xl font-bold text-gray-800 mb-4">{job.position}</h3>
       
       <div className="flex flex-wrap gap-2 mb-4">
-        {job.type.map((type, index) => (
+        {job.type.map((type: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined, index: React.Key | null | undefined) => (
           <span key={index} className="px-3 py-1 bg-white rounded-full text-sm text-gray-600">
             {type}
           </span>
@@ -151,11 +165,15 @@ const JobListingsPage = () => {
             Cancel
           </button>
           <button 
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-300"
-          >
-            Logout
-          </button>
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-300"
+                onClick={() => {
+                  localStorage.clear(); // Clear user data
+                  window.location.href = "../AuthPages/LogIn"; // Redirect to login page
+                }}
+              >
+                <FontAwesomeIcon icon={faRightFromBracket} className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
         </div>
       </div>
     </div>
@@ -176,6 +194,7 @@ const JobListingsPage = () => {
           </h1>
         </div>
         <div className="flex items-center">
+        <span className="mr-10 text-gray-700 font-semibold">Hello, {firstName}!</span> 
           <button 
             className="p-2 rounded-full hover:bg-gray-100 transition-all duration-300"
             onClick={() => setShowDropdown(!showDropdown)}

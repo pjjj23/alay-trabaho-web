@@ -51,14 +51,64 @@ export const loginUser = async (loginData: { email: string; password: string }) 
       throw new Error(data.message || `Error: ${response.statusText}`);
     }
 
-    if (data.success) {
+    if (data.success && data.user) {
       localStorage.setItem("user", JSON.stringify(data.user));
-      return data.user;
+      return data; // ✅ Return the full response instead of just `data.user`
     } else {
       throw new Error("Login failed");
     }
   } catch (error) {
     console.error("Login API Error:", error);
+    throw error;
+  }
+};
+
+export const addRecruiter = async (jobData: { JobPostedDate: any; CompanyName: any; CompanyLogo: any; CompanyDescription: any; CompanyAddress: any; CompanyContactNumber: any; CompanySalaryRange: any; HiringPosition: any; WorkSchedule: any; WorkSetup: any; ExperienceLvl: any; userEmail: any; firstName: any; lastName: any; contactNumber: any; role: any; }) => {
+  try {
+    // Ensure `userEmail` is renamed to `email`  
+    const fixedJobData = {
+      dto: {
+        email: jobData.userEmail, // FIXED: Renaming 'userEmail' to 'email'
+        firstName: jobData.firstName,
+        lastName: jobData.lastName,
+        contactNumber: jobData.contactNumber,
+        role: jobData.role,
+        CompanyName: jobData.CompanyName,
+        CompanyLogo: jobData.CompanyLogo,
+        CompanyDescription: jobData.CompanyDescription,
+        CompanyAddress: jobData.CompanyAddress,
+        CompanyContactNumber: jobData.CompanyContactNumber,
+        CompanySalaryRange: jobData.CompanySalaryRange,
+        JobPostedDate: jobData.JobPostedDate,
+        HiringPosition: jobData.HiringPosition,
+        WorkSchedule: jobData.WorkSchedule,
+        WorkSetup: jobData.WorkSetup,
+        ExperienceLvl: jobData.ExperienceLvl,
+      }
+    };
+
+    const response = await fetch(
+      "https://alaytrabaho-d6g3b8h0gabdgwgb.canadacentral-01.azurewebsites.net/api/recruiters",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fixedJobData), // FIXED: Wrap inside "dto"
+      }
+    );
+
+    const responseData = await response.json();
+    console.log("API Response:", responseData); // Log full response
+
+    if (!response.ok) {
+      console.error("Validation Errors:", responseData.errors);
+      throw new Error(responseData.title || `Error: ${response.statusText}`);
+    }
+
+    return responseData;
+  } catch (error) {
+    console.error("Job Adding API Error:", error);
     throw error;
   }
 };

@@ -31,30 +31,48 @@ const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-  
+
     try {
-      const response = await loginUser({ email, password });
-      
-      console.log("Raw API Response:", response); // Debugging API response
-  
-      // ✅ Instead of checking `response.success`, check if `userId` exists
-      if (response?.userId) { 
-        // Store user details
-        localStorage.setItem("user", JSON.stringify(response));
-  
-        // Redirect to dashboard
-        router.push("../userPages/dashboard");
-      } else {
-        showModal("Please fill in all required fields.", "error");
-        return;
-      }
-    } catch (error: any) { 
-      showModal("Login failed, please check your credentials.", "error");
-      return;
+        const response = await loginUser({ email, password });
+
+        console.log("Full API Response:", response);
+        console.log("User Data:", response.user);
+
+        // ✅ Check if user data exists
+        if (response?.user) {  
+            const { role } = response.user; // Get role from user object
+
+            console.log("User Role:", role); 
+
+            // Ensure Role is present
+            if (!role) {
+                showModal("User role is missing. Please contact support.", "error");
+                return;
+            }
+
+            // Store user details
+            localStorage.setItem("user", JSON.stringify(response.user));
+
+            // ✅ Route based on Role
+            if (role === "Applicant") {
+                router.push("../userPages/dashboard");  
+            } else if (role === "Recruiter") {
+                router.push("../adminPages/dashboard");  
+            } else {
+                showModal("Invalid user role.", "error");
+            }
+        } else {
+            showModal("Login failed, please check your credentials.", "error");
+        }
+    } catch (error: any) {
+        console.error("Login Error:", error);
+        showModal("Login failed, please check your credentials.", "error");
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  };
+};
+
+
 
   const showModal = (message: string, type: "error" | "success") => {
     setModalMessage(message);

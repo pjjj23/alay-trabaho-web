@@ -18,28 +18,42 @@ const ProfileCard = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profileImage, setProfileImage] = useState("/assets/img/default-profileimg.png");
   const fileInputRef = useRef(null);
+  const [firstName, setFirstName] = useState<string | null>(null);
+  const [middleName, setMiddleName] = useState<string | null>(null);
+  const [lastName, setLastName] = useState<string | null>(null);
+  const [role, Role] = useState<string | null>(null);
+  const [contactNumber, setContactNumber] = useState<string | null>(null);
+
   useEffect(() => {
     document.title = "User Profile | AlayTrabaho";
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      setFirstName(userData.firstName || "NULL"); 
+      setMiddleName(userData.middleName || "");
+      setLastName(userData.lastName || "NULL");
+      Role(userData.role || "Guest");
+      setContactNumber(userData.contactNumber || "NoContactNumber");
+    }
   }, []);
+  useEffect(() => {
+    setFormData((prevData) => ({
+      ...prevData,
+      name: `${firstName || ""} ${middleName || ""} ${lastName || ""}`.trim(),
+      role: role || "Guest",
+      contactNum: contactNumber || "NoContactNumber",
+    }));
+  }, [firstName, middleName, lastName, contactNumber]); 
   const [formData, setFormData] = useState({
-    name: 'Juan Dela Cruz',
-    profession: 'Software Developer',
-    birthday: 'May 05, 2000',
-    role: 'Applicant',
-    contactNumber: '09154600068',
-    address: 'A. Lopez St, Labangon, Cebu City, Cebu, Philippines',
-    bio: `Sed dictum nunc sit amet libero sit imperdium urna semetnec. Morbi ut dia prametib, vestibulu urna dictum effici. 
-    Nullam tincidunt nibh, pharetra velit auctor, nec malesuada arma portis. Suspendisse, ornare odio at maximus sodales. Proin 
-    venenatis justo eu mi imperdiet, quis mattis arcu lobortis. Pellentesque orare nulla facilisis magna imperdiet dictum. Suspendisse 
-    augue nisi, rhoncus eget nisi eget, sociates tincidunt dui. Pellentesque sodales, diam eget sollicitudin finibus, sapien enim finibus 
-    diam, at placerat nisi purus vitae nunc. Phasellus vitae facilisis metus. Nullam vehicula est consectetur, malesuada nulla vitae, 
-    molestie sapien. Pellentesque ac augue id neque mattis vestibulum nec imperdiet ligula.
-
-    Aenean et varius nisi. In hac habitasse platea dictumst. Pellentesque volutpat massa quam, ut eleifend tellus ornare id. 
-    Suspendisse tempor sagittis sodales. Interdum et malesuada fames ac ante ipsum primis in faucibus. Aliquam quis sodales est, 
-    ut facilisis eros. Praesent faucibus ex vitae tellus convallis, eu volutpat massa tempus. Donec commodo tortor vitae turpis ultrices, 
-    sit amet tempor quam malesuada libero, vel porta purus augue viverra turpis. Sed cursus lacus et laculis rhoncus.`
+    name: `${firstName || ""} ${middleName || ""} ${lastName || ""}`.trim(),
+    profession: "No profession saved",
+    birthday: "No birthday saved",
+    role: `${role || "Guest"}`,
+    contactNum: contactNumber || "NoContactNumber",
+    address: "No address saved",
+    bio: `Enter a short description about you here`,
   });
+  
 
   const [tempData, setTempData] = useState({ ...formData });
 
@@ -83,14 +97,15 @@ const ProfileCard = () => {
             Cancel
           </button>
           <button 
-            onClick={() => {
-              setShowLogoutModal(false);
-              setShowDropdown(false);
-            }}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-300"
-          >
-            Logout
-          </button>
+                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-300"
+                          onClick={() => {
+                            localStorage.clear(); // Clear user data
+                            window.location.href = "../AuthPages/LogIn"; // Redirect to login page
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faRightFromBracket} className="w-4 h-4" />
+                          <span>Logout</span>
+                        </button>
         </div>
       </div>
     </div>
@@ -142,6 +157,7 @@ const ProfileCard = () => {
           </h1>
         </div>
         <div className="flex items-center">
+        <span className="mr-10 text-gray-700 font-semibold">Hello, {firstName}!</span> 
           <button 
             className="p-2 rounded-full hover:bg-gray-100 transition-all duration-300"
             onClick={() => setShowDropdown(!showDropdown)}
@@ -260,7 +276,7 @@ const ProfileCard = () => {
                   <ProfileField label="Profession" value={formData.profession} field="profession" />
                   <ProfileField label="Birthday" value={formData.birthday} field="birthday" editable={false} />
                   <ProfileField label="Role" value={formData.role} field="role" editable={false} />
-                  <ProfileField label="Contact Number" value={formData.contactNumber} field="contactNumber" />
+                  <ProfileField label="Contact Number" value={formData.contactNum} field="contactNum" />
                   <ProfileField label="Address" value={formData.address} field="address" />
                 </div>
 
