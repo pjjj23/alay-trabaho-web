@@ -1,22 +1,24 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as router } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBuilding,  faEllipsisV, 
-    faMapMarkerAlt, 
+import { faBuilding, faEllipsisV,
+    faMapMarkerAlt,
     faPlus,
-    faHome, 
-    faUser, 
-    faLocationDot, 
+    faHome,
+    faUser,
+    faLocationDot,
     faRightFromBracket,
-    faTimes, faCheck, faX, faTrash } from '@fortawesome/free-solid-svg-icons';
+    faTimes, faCheck, faX, faTrash, faPhoneAlt, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 
 const JobPosting = () => {
   const [activeTab, setActiveTab] = useState('details');
     const [showDropdown, setShowDropdown] = useState(false);
-      const [showLogoutModal, setShowLogoutModal] = useState(false); 
-       
-    
+      const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [jobDetails, setJobDetails] = useState(null); // State to store job details
+    const [loading, setLoading] = useState(true); // State to track loading
+    const [error, setError] = useState(null); // State to track errors
+
       const applicants = [
         { name: "Vivamus Sed Purus", profession: "Senior Software Developer", dateSubmitted: "February 13, 2025" },
         { name: "Vivamus Sed Purus", profession: "Senior Software Developer", dateSubmitted: "February 13, 2025" },
@@ -36,13 +38,13 @@ const JobPosting = () => {
               <h3 className="text-xl font-semibold mb-4">Confirm Logout</h3>
               <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
               <div className="flex justify-end gap-4">
-                <button 
+                <button
                   onClick={() => setShowLogoutModal(false)}
                   className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-300"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   onClick={() => {
                     setShowLogoutModal(false);
                     setShowDropdown(false);
@@ -56,7 +58,45 @@ const JobPosting = () => {
           </div>
         );
 
-  return (
+    // useEffect to fetch data on component mount
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const storedUserData = localStorage.getItem('user');
+                if (storedUserData) {
+                    const userData = JSON.parse(storedUserData);
+                    //ADD THIS CHECK
+                    if(userData && userData.email){
+                      const userEmail = userData.email;
+
+                      const apiUrl = `https://alaytrabaho-d6g3b8h0gabdgwgb.canadacentral-01.azurewebsites.net/api/recruiters/${userEmail}`;
+                      const response = await fetch(apiUrl);
+                      if (!response.ok) {
+                          throw new Error(`HTTP error! status: ${response.status}`);
+                      }
+                      const data = await response.json();
+                      console.log(data) //CHECK DATA STRUCTURE
+                      setJobDetails(data); //Set the jobDetails
+                    } else {
+                      setError('User data does not contain email');
+                    }
+
+                } else {
+                    setError('User data not found in local storage');
+                }
+            } catch (e) {
+                setError(e.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+ return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
         {showLogoutModal && <LogoutModal />}
       {/* Header Section */}
@@ -72,31 +112,31 @@ const JobPosting = () => {
                       </h1>
                     </div>
                     <div className="flex items-center">
-                      <button 
+                      <button
                         className="p-2 rounded-full hover:bg-gray-100 transition-all duration-300"
                         onClick={() => setShowDropdown(!showDropdown)}
                       >
-                        <img 
-                          src="/assets/img/default-profileimg.png" 
+                        <img
+                          src="/assets/img/default-profileimg.png"
                           className="w-10 h-10 rounded-full top-4 right-8 absolute"
                         />
                       </button>
-                      
+
                       {showDropdown && (
                         <div className="absolute right-0 top-16 w-56 bg-gray-800 rounded-lg shadow-lg py-2 transition-all duration-300">
                           <a href="../adminPages/dashboard"><button className="w-full px-4 py-2 text-left hover:bg-gray-700 flex items-center gap-2">
                             <FontAwesomeIcon icon={faHome} className="w-4 h-4 text-white" />
-                             <span className="text-white">Home</span> 
+                             <span className="text-white">Home</span>
                           </button></a>
-            
+
                           <a href="../adminPages/adminSettings"><button className="w-full px-4 py-2 text-left hover:bg-gray-700 flex items-center gap-2">
                             <FontAwesomeIcon icon={faUser} className="w-4 h-4 text-white" />
-                             <span className="text-white">Profile</span> 
-                          </button></a> 
-                          
+                             <span className="text-white">Profile</span>
+                          </button></a>
+
                           <div className="border-t border-gray-200 my-1"></div>
-                          
-                          <button 
+
+                          <button
                             className="w-full px-4 py-2 text-left hover:bg-gray-700 flex items-center gap-2 text-red-600"
                             onClick={() => {
                               setShowLogoutModal(true);
@@ -111,19 +151,21 @@ const JobPosting = () => {
                     </div>
                   </header>
         <div className="relative inset-y-50 p-10 top-10">
+        {loading && <div>Loading job details...</div>}
+            {error && <div>Error: {error}</div>}
+            {!loading && !error && jobDetails && (
       <div className="bg-blue-100 rounded-lg p-6">
         <div className="mb-4">
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-2">
               <div className="bg-green-400 w-6 h-6 rounded"></div>
-              <span>Lorem Ipsum Corporation</span>
+              <span>{jobDetails.companyName || 'Lorem Ipsum Corporation'}</span>
             </div>
             <div className="text-right">
-              <div className="font-bold">₱110,000</div>
+              <div className="font-bold">₱{jobDetails.companySalaryRange || ''}.00/monthly</div>
               <div className="text-sm">
-                Sto. Niño, Cebu City,
-                <br />
-                Cebu, Philippines
+                {jobDetails.companyAddress || 'Sto. Niño, Cebu City, Cebu, Philippines'}
+                <br /> 
               </div>
               <div className="text-sm mt-1 flex justify-end items-center">
                 Locate Us <FontAwesomeIcon icon={faLocationDot} className="w-4 h-4" style={{ color: "red" }}/>
@@ -131,17 +173,16 @@ const JobPosting = () => {
             </div>
           </div>
         </div>
-        
-        <h1 className="text-2xl font-bold mb-3">Senior UI/UX Designer</h1>
-        
+
+        <h1 className="text-2xl font-bold mb-3">{jobDetails.hiringPosition || 'Senior UI/UX Designer'}</h1>
         <div className="flex gap-2">
-          <button className="px-4 py-1 bg-blue-200 rounded-full text-sm">Full time</button>
-          <button className="px-4 py-1 bg-blue-200 rounded-full text-sm">Full time</button>
-          <button className="px-4 py-1 bg-blue-200 rounded-full text-sm">Full time</button>
+          <button className="px-4 py-1 bg-blue-200 rounded-full text-sm">{jobDetails.workSchedule}</button>
+          <button className="px-4 py-1 bg-blue-200 rounded-full text-sm">{jobDetails.workSetup}</button>
+          <button className="px-4 py-1 bg-blue-200 rounded-full text-sm">{jobDetails.experienceLvl}</button>
         </div>
       </div>
-
-      {/* Navigation */}
+            )}
+       {/* Navigation */}
       <div className="flex justify-center mt-4 border-b">
         <button
           className={`px-6 py-2 ${activeTab === 'details' ? 'border-b-2 border-blue-500 text-blue-500' : ''}`}
@@ -156,75 +197,78 @@ const JobPosting = () => {
           Applicants
         </button>
       </div>
+       {/* Main Content */}
+            {activeTab === 'details' && (
+                <div className="mt-6 shadow-md bg-black/5 dark:bg-black/50 p-5">
+                    <div className="flex gap-8">
+                        {/* Left Column */}
+                        <div className="w-7/12">
+                            <section className="mb-6">
+                                <h2 className="font-bold mb-2">Owner Profile:</h2>
+                                {jobDetails && (  //Conditionally render only if jobDetails exists
+                                  <ul className="space-y-2">
+                                      <li>Name: {jobDetails.firstName} {jobDetails.middleName} {jobDetails.lastName}</li>
+                                      <li>Contact#: {jobDetails.contactNumber}</li>
+                                      <li>Birthday: {jobDetails.birthdate}</li>
+                                      <li>Owner's Address: {jobDetails.userAddress}</li> 
+                                  </ul>
+                                )}
+                            </section>
 
-      {/* Main Content */}
-      {activeTab === 'details' && (
-        <div className="mt-6 shadow-md bg-black/5 dark:bg-black/50 p-5">
-          <div className="flex gap-8">
-            {/* Left Column */}
-            <div className="w-7/12">
-              <section className="mb-6">
-                <h2 className="font-bold mb-2">Qualifications:</h2>
-                <ul className="space-y-2">
-                  <li>3+ years in a similar role with a strong UI design portfolio.</li>
-                  <li>Experience in app, desktop, and web design.</li>
-                  <li>Proficiency in design tools like Adobe CS, Sketch, Figma, InVision, Balsamiq, or Ant Design.</li>
-                  <li>Ability to understand complex requirements and design effective solutions.</li>
-                  <li>Skilled in presenting designs to stakeholders across various platforms.</li>
-                  <li>Collaborative mindset, working with BAs, developers, and testers.</li>
-                  <li>Experience with remote teams.</li>
-                  <li>Growth mindset—open to learning and feedback.</li>
-                </ul>
-              </section>
+                            <section className="mb-6">
+                                <h2 className="font-bold mb-2">Job Description:</h2>
+                                {jobDetails && ( //Conditionally render only if jobDetails exists
+                                  <p className="text-sm leading-relaxed">
+                                      {jobDetails.companyDescription}
+                                  </p>
+                                )}
+                            </section> 
+                        </div>
 
-              <section className="mb-6">
-                <h2 className="font-bold mb-2">Job Description:</h2>
-                <p className="text-sm leading-relaxed">
-                  As the sole designer, in a team of software developers, software testers and business analysts, you will be working on creating and maintaining the user experience and screen design for our range of web, mobile and desktop-based systems. The work involves some 'green fields' projects and some modifications to existing experiences. Our existing team is broken into smaller groups who work on individual projects, of which you may be assigned to several at a time. Each team works closely on each phase of the development, from initial wireframes through to product completion.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="font-bold mb-2">Job Responsibilities:</h2>
-                <ul className="text-sm space-y-2">
-                  <li>• Conduct user research and evaluate feedback to tailor designs to user needs.</li>
-                  <li>• Sketch, design, and discuss new concepts.</li>
-                  <li>• Perform usability testing.</li>
-                  <li>• Work with design systems like Storybook.</li>
-                  <li>• Create and present user journeys and flows.</li>
-                  <li>• Collaborate with developers from design to deployment.</li>
-                  <li>• Follow and contribute to UI/UX guidelines and best practices.</li>
-                  <li>• Engage in team collaboration, knowledge sharing, and learning.</li>
-                  <li>• Stay updated on emerging UI technologies and trends.</li>
-                </ul>
-              </section>
-            </div>
-
-            {/* Right Column */}
-            <div className="w-5/12">
-              <div className="mb-6">
-                <h2 className="font-bold mb-4">Company Profile:</h2>
-                <table className="w-full text-sm">
-                  <tbody>
-                    <tr>
-                      <td className="pb-2">Company Name:</td>
-                      <td className="pb-2">Lorem Ipsum Corporation</td>
-                    </tr>
-                    <tr>
-                      <td className="pb-2">Type:</td>
-                      <td className="pb-2">Software Development</td>
-                    </tr>
-                    <tr>
-                      <td className="align-top">Employees:</td>
-                      <td>50-200 Employees</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div> 
-      )}
+                        {/* Right Column */}
+                        <div className="w-5/12">
+                            <div className="mb-6">
+                                <h2 className="font-bold mb-4">Company Profile:</h2>
+                                <table className="w-full text-sm">
+                                    <tbody>
+                                        <tr>
+                                            <td className="pb-2">Company Name:</td>
+                                            <td className="pb-2"> {jobDetails && ( //Conditionally render only if jobDetails exists
+                                                <p className="text-sm leading-relaxed">
+                                                    {jobDetails.companyName}
+                                                </p>
+                                              )}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="pb-2">Company Address:</td>
+                                            <td className="pb-2">{jobDetails && ( //Conditionally render only if jobDetails exists
+                                  <p className="text-sm leading-relaxed">
+                                      {jobDetails.companyAddress}
+                                  </p>
+                                )}</td>
+                                        </tr> 
+                                    </tbody>
+                                </table><br></br>
+                                <h2 className="font-bold mb-4">Reach Us:</h2>
+                                <div>
+                                  <span className="font-semibold"><FontAwesomeIcon icon={faEnvelope} className="mr-2 text-blue-500" /></span> {jobDetails && ( //Conditionally render only if jobDetails exists
+                                  <p className="text-sm leading-relaxed">
+                                      {jobDetails.email}
+                                  </p>
+                                )}
+                                </div>
+                                 <div>
+                                  <span className="font-semibold"><FontAwesomeIcon icon={faPhoneAlt} className="mr-2 text-blue-500" /></span> {jobDetails && ( //Conditionally render only if jobDetails exists
+                                  <p className="text-sm leading-relaxed">
+                                      {jobDetails.companyContactNumber}
+                                  </p>
+                                )}
+                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
       </div>
 
       {activeTab === 'applicants' && (
@@ -275,7 +319,7 @@ const JobPosting = () => {
                   </table>
                 </div>
               )}
- 
+
 
       {/* Footer Dots */}
       <div className="flex justify-center gap-2 mt-8">
