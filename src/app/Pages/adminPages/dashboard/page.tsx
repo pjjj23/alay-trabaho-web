@@ -125,6 +125,78 @@ const JobCard = ({ colorScheme }) => {
     return <p>No recruiter data to display.</p>;
   }
 
+  const handleRemove = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+        alert("Error: No logged-in user found.");
+        return;
+    }
+
+    const userData = JSON.parse(storedUser);
+    if (!userData) {
+        alert("Error: Could not parse user data.");
+        return;
+    }
+    const { email: userEmail } = userData;
+
+    if (!userEmail) {
+        alert("Error: User email is missing.");
+        return;
+    }
+
+    // Show confirmation alert
+    const confirmRemove = window.confirm("Are you sure you want to empty all the fields?");
+    if (!confirmRemove) {
+        return; // If the user cancels, exit the function
+    }
+
+    // Prepare the data to be sent to the API (empty values)
+    const jobData = {
+        CompanyName: "",
+        CompanyLogo: "",
+        CompanyDescription: "",
+        CompanyAddress: "",
+        CompanyContactNumber: "",
+        CompanySalaryRange: "",
+        JobPostedDate: "",
+        HiringPosition: "",
+        WorkSchedule: "",
+        WorkSetup: "",
+        ExperienceLvl: "",
+    };
+
+    console.log("Job Data being sent for update:", JSON.stringify(jobData, null, 2));
+
+    try {
+        // Make the API call to update the recruiter by email
+        const response = await fetch(`https://alaytrabaho-d6g3b8h0gabdgwgb.canadacentral-01.azurewebsites.net/api/recruiters/${userEmail}`, {
+            method: 'PUT', // Or PATCH, depending on your API
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(jobData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to update recruiter: ${response.status}`);
+        }
+
+        console.log("API Response:", response);
+        alert("Job successfully updated to empty values!");
+
+    } catch (error: any) {
+        console.error("Job Update API Error:", error);
+        if (error.response) {
+            console.error("Error Details:", error.response.data);
+        }
+        alert(`Failed to update job to empty values: ${error.message}`);
+    }
+};
+
+
+
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden w-full">
       <div className={`w-full h-full rounded-xl p-8 ${colorScheme.bg}`}>
@@ -143,7 +215,7 @@ const JobCard = ({ colorScheme }) => {
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-36 bg-white rounded-md shadow-lg border border-gray-200 z-50">
                 <div className="py-1">
-                  <button
+                  <a href="../adminPages/addJob"><button
                     className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={() => {
                       console.log('Edit clicked');
@@ -151,16 +223,14 @@ const JobCard = ({ colorScheme }) => {
                     }}
                   > 
                     Edit
-                  </button>
+                  </button></a>
                   <button
-                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                    onClick={() => {
-                      console.log('Remove clicked');
-                      setIsDropdownOpen(false);
-                    }}
-                  > 
-                    Remove
+                      className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      onClick={handleRemove} // Call handleRemove directly
+                  >
+                      Remove
                   </button>
+
                 </div>
               </div>
             )}

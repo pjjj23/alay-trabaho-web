@@ -18,6 +18,7 @@ const JobPosting = () => {
     const [jobDetails, setJobDetails] = useState(null); // State to store job details
     const [loading, setLoading] = useState(true); // State to track loading
     const [error, setError] = useState(null); // State to track errors
+      const [applications, setApplications] = useState([]);
 
       const applicants = [
         { name: "Vivamus Sed Purus", profession: "Senior Software Developer", dateSubmitted: "February 13, 2025" },
@@ -71,18 +72,34 @@ const JobPosting = () => {
                     if(userData && userData.email){
                       const userEmail = userData.email;
 
-                      const apiUrl = `https://alaytrabaho-d6g3b8h0gabdgwgb.canadacentral-01.azurewebsites.net/api/recruiters/${userEmail}`;
-                      const response = await fetch(apiUrl);
-                      if (!response.ok) {
-                          throw new Error(`HTTP error! status: ${response.status}`);
+                      const recruiterApiUrl = `https://alaytrabaho-d6g3b8h0gabdgwgb.canadacentral-01.azurewebsites.net/api/recruiters/${userEmail}`;
+                      const recruiterResponse = await fetch(recruiterApiUrl);
+                      if (!recruiterResponse.ok) {
+                          throw new Error(`HTTP error! status: ${recruiterResponse.status}`);
                       }
-                      const data = await response.json();
-                      console.log(data) //CHECK DATA STRUCTURE
-                      setJobDetails(data); //Set the jobDetails
+                      const recruiterData = await recruiterResponse.json();
+                      console.log(recruiterData) //CHECK DATA STRUCTURE
+                      setJobDetails(recruiterData); //Set the jobDetails
+
+                      const companyName = recruiterData.companyName;
+
+                      const applicationsApiUrl = 'https://alaytrabaho-d6g3b8h0gabdgwgb.canadacentral-01.azurewebsites.net/api/applyJobs';
+                      const applicationsResponse = await fetch(applicationsApiUrl);
+
+                      if (!applicationsResponse.ok) {
+                          throw new Error(`Applications API error! Status: ${applicationsResponse.status}`);
+                      }
+
+                      const allApplications = await applicationsResponse.json();
+
+                      // 5. Filter applications
+                      const filteredApplications = allApplications.filter(app => app.companyName === companyName);
+                      setApplications(filteredApplications);
+
+
                     } else {
                       setError('User data does not contain email');
                     }
-
                 } else {
                     setError('User data not found in local storage');
                 }
@@ -96,8 +113,36 @@ const JobPosting = () => {
         fetchData();
     }, []);
 
+    // Function to update application status
+    const updateApplicationStatus = async (applicationId, status) => {
+        try {
+            const updateApiUrl = `https://alaytrabaho-d6g3b8h0gabdgwgb.canadacentral-01.azurewebsites.net/api/applyJobs/${applicationId}`; // Replace with your actual API endpoint
+            const response = await fetch(updateApiUrl, {
+                method: 'PUT', // or PATCH, depending on your API
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ applicantApplyStatus: status }), // Send the new status
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to update status: ${response.status}`);
+            }
+
+            // Update the applications state to reflect the change
+            setApplications(prevApplications =>
+                prevApplications.map(app =>
+                    app.id === applicationId ? { ...app, applicantApplyStatus: status } : app
+                )
+            );
+        } catch (error) {
+            console.error("Error updating application status:", error);
+            setError(error.message);
+        }
+    };
+
  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+    <div className="min-h-screen bg-gradient-to-bl from-[#e3f2fd] to-[#9cd5ff]">
         {showLogoutModal && <LogoutModal />}
       {/* Header Section */}
       <header className="flex justify-between items-center px-8 py-5 bg-white fixed w-full shadow-sm z-10">
@@ -165,7 +210,7 @@ const JobPosting = () => {
               <div className="font-bold">₱{jobDetails.companySalaryRange || ''}.00/monthly</div>
               <div className="text-sm">
                 {jobDetails.companyAddress || 'Sto. Niño, Cebu City, Cebu, Philippines'}
-                <br /> 
+                <br />
               </div>
               <div className="text-sm mt-1 flex justify-end items-center">
                 Locate Us <FontAwesomeIcon icon={faLocationDot} className="w-4 h-4" style={{ color: "red" }}/>
@@ -173,7 +218,6 @@ const JobPosting = () => {
             </div>
           </div>
         </div>
-
         <h1 className="text-2xl font-bold mb-3">{jobDetails.hiringPosition || 'Senior UI/UX Designer'}</h1>
         <div className="flex gap-2">
           <button className="px-4 py-1 bg-blue-200 rounded-full text-sm">{jobDetails.workSchedule}</button>
@@ -185,7 +229,7 @@ const JobPosting = () => {
        {/* Navigation */}
       <div className="flex justify-center mt-4 border-b">
         <button
-          className={`px-6 py-2 ${activeTab === 'details' ? 'border-b-2 border-blue-500 text-blue-500' : ''}`}
+          className={`px-6 py-2 ${activeTab === 'details' ? 'border-b-2 border-white-50 text-blue-500' : ''}`}
           onClick={() => setActiveTab('details')}
         >
           Details
@@ -210,7 +254,7 @@ const JobPosting = () => {
                                       <li>Name: {jobDetails.firstName} {jobDetails.middleName} {jobDetails.lastName}</li>
                                       <li>Contact#: {jobDetails.contactNumber}</li>
                                       <li>Birthday: {jobDetails.birthdate}</li>
-                                      <li>Owner's Address: {jobDetails.userAddress}</li> 
+                                      <li>Owner's Address: {jobDetails.userAddress}</li>
                                   </ul>
                                 )}
                             </section>
@@ -222,7 +266,7 @@ const JobPosting = () => {
                                       {jobDetails.companyDescription}
                                   </p>
                                 )}
-                            </section> 
+                            </section>
                         </div>
 
                         {/* Right Column */}
@@ -246,7 +290,7 @@ const JobPosting = () => {
                                       {jobDetails.companyAddress}
                                   </p>
                                 )}</td>
-                                        </tr> 
+                                        </tr>
                                     </tbody>
                                 </table><br></br>
                                 <h2 className="font-bold mb-4">Reach Us:</h2>
@@ -276,14 +320,13 @@ const JobPosting = () => {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-2 font-normal text-gray-600">Name</th>
-                        <th className="text-left py-2 font-normal text-gray-600">Profession</th>
-                        <th className="text-left py-2 font-normal text-gray-600">Date Submitted</th>
+                        <th className="text-left py-2 font-normal text-gray-600">Email</th>
+                        <th className="text-left py-2 font-normal text-gray-600">Status</th> 
                         <th className="text-left py-2 font-normal text-gray-600">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {applicants.map((applicant, index) => (
+                      {applications.map((applicant, index) => (
                         <tr
                           key={index}
                           className={
@@ -292,42 +335,36 @@ const JobPosting = () => {
                               : 'hover:bg-gray-100 cursor-pointer'
                           }
                           onClick={(event) => {
-                            if (event.target.tagName !== 'BUTTON' && !event.target.closest('button')) {
-                              window.location.href = '../adminPages/EmployeeProfile';
+                            if (event.target.tagName !== 'BUTTON') {
+                              // Handle row click, e.g., navigate to applicant details
+                              console.log('Row clicked for applicant:', applicant);
                             }
                           }}
                         >
-                          <td className="py-2">{applicant.name}</td>
-                          <td className="py-2">{applicant.profession}</td>
-                          <td className="py-2">{applicant.dateSubmitted}</td>
+                          <td className="py-2">{applicant.email}</td>
+                          <td className="py-2">{applicant.applicantApplyStatus}</td> 
                           <td className="py-2">
-                            <div className="flex gap-1">
-                              <button className="w-5 h-5 rounded-full bg-green-500">
-                                <FontAwesomeIcon icon={faCheck} className="w-4 h-4 text-white" />
-                              </button>
-                              <button className="w-5 h-5 rounded-full bg-red-500">
-                                <FontAwesomeIcon icon={faX} className="w-4 h-4 text-white" />
-                              </button>
-                              <button className="w-5 h-5 rounded-full bg-gray-500">
-                                <FontAwesomeIcon icon={faTrash} className="w-4 h-4 text-white" />
-                              </button>
-                            </div>
+                            <button
+                                className="px-3 py-1 bg-green-500 hover:bg-green-700 text-white rounded mr-2"
+                                onClick={() => updateApplicationStatus(applicant.id, 'approved')}
+                            >
+                              <FontAwesomeIcon icon={faCheck} />
+                            </button>
+                            <button
+                                className="px-3 py-1 bg-red-500 hover:bg-red-700 text-white rounded"
+                                onClick={() => updateApplicationStatus(applicant.id, 'rejected')}
+                            >
+                              <FontAwesomeIcon icon={faX} />
+                            </button>
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-              )}
-
-
-      {/* Footer Dots */}
-      <div className="flex justify-center gap-2 mt-8">
-        <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-        <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-      </div>
+            )}
     </div>
-  );
+ );
 };
 
 export default JobPosting;

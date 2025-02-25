@@ -159,7 +159,7 @@ const ApplyJob = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-gradient-to-bl from-[#e3f2fd] to-[#9cd5ff]">
            {showLogoutModal && <LogoutModal />}
             {showResumeModal && <ResumeModal />} {/* Render the resume modal */}
             {/* Header */}

@@ -417,7 +417,7 @@ const ProfileCard = () => {
 
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+        <div className="min-h-screen bg-gradient-to-bl from-[#e3f2fd] to-[#9cd5ff]">
             {showLogoutModal && <LogoutModal />}
 
             {/* Header */}

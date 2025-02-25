@@ -86,7 +86,7 @@ const LoginPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100  flex flex-col overflow-hidden relative">
+    <div className="min-h-screen bg-gradient-to-bl from-[#e3f2fd] to-[#9cd5ff]  flex flex-col overflow-hidden relative">
       {/* Header */}
       <header className="flex justify-between items-center px-8 py-4 bg-white/80 backdrop-blur-sm fixed top-0 z-50 shadow-sm w-full">
       <div className="flex items-center cursor-pointer group">

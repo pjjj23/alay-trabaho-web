@@ -12,8 +12,11 @@ const JobListingsPage = () => {
     const [loading, setLoading] = useState(true); // Loading state
 
     useEffect(() => {
-        document.title = "User Dashboard | AlayTrabaho";
-        const storedUser = localStorage.getItem("user");
+        const storedData = localStorage.getItem("recruiters");
+    
+        if (storedData) {
+            const parsedData = JSON.parse(storedData);
+            const storedUser = localStorage.getItem("user");
         if (storedUser) {
             const userData = JSON.parse(storedUser);
             setFirstName(userData.firstName || "User"); // Default to "User" if firstName is missing
@@ -21,14 +24,16 @@ const JobListingsPage = () => {
         if (!storedUser) {
             router.push("/Pages/AuthPages/LogIn"); // 🔥 Redirect to login page if no session
         }
-    }, []);
-
-    useEffect(() => {
-        // Fetch recruiters data, similar to your original code
-        const storedData = localStorage.getItem("recruiters");
-
-        if (storedData) {
-            setRecruiters(JSON.parse(storedData));
+            const updatedRecruiters = parsedData.map(recruiter => {
+                const updatedRecruiter = {};
+                for (const key in recruiter) {
+                    if (recruiter.hasOwnProperty(key)) {
+                        updatedRecruiter[key] = recruiter[key] ? recruiter[key] : "Coming Soon";
+                    }
+                }
+                return updatedRecruiter;
+            });
+            setRecruiters(updatedRecruiters);
             setLoading(false);
         } else {
             fetch("https://alaytrabaho-d6g3b8h0gabdgwgb.canadacentral-01.azurewebsites.net/api/recruiters")
@@ -39,12 +44,20 @@ const JobListingsPage = () => {
                     return response.json();
                 })
                 .then((data) => {
-                    // Filter recruiters where companyName is not empty or null
-                    const filteredRecruiters = data.filter(recruiter => recruiter.companyName && recruiter.companyName.trim() !== "");
-
-                    // Store filtered data in localStorage
+                    const updatedRecruiters = data.map(recruiter => {
+                        const updatedRecruiter = {};
+                        for (const key in recruiter) {
+                            if (recruiter.hasOwnProperty(key)) {
+                                updatedRecruiter[key] = recruiter[key] ? recruiter[key] : "Coming Soon";
+                            }
+                        }
+                        return updatedRecruiter;
+                    });
+    
+                    const filteredRecruiters = updatedRecruiters.filter(recruiter => recruiter.companyName && recruiter.companyName.trim() !== "");
+    
                     localStorage.setItem("recruiters", JSON.stringify(filteredRecruiters));
-
+    
                     setRecruiters(filteredRecruiters);
                     setLoading(false);
                 })
@@ -54,6 +67,7 @@ const JobListingsPage = () => {
                 });
         }
     }, []);
+    
 
 
     const [showDropdown, setShowDropdown] = useState(false);
@@ -145,7 +159,7 @@ const JobListingsPage = () => {
     );
 
     return (
-        <div className="min-h-screen bg-blue-50">
+        <div className="min-h-screen bg-gradient-to-bl from-[#e3f2fd] to-[#9cd5ff]">
             {showLogoutModal && <LogoutModal />}
             <header className="flex justify-between items-center px-8 py-5 bg-white fixed w-full shadow-sm z-10">
                 <div className="flex items-center cursor-pointer group">

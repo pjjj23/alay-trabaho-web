@@ -32,7 +32,7 @@ const ProfileCard = () => {
   const [message, setMessage] = useState("");
 
     useEffect(() => {
-      document.title = "User Profile | AlayTrabaho";
+      document.title = "Admin Profile | AlayTrabaho";
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
           const userData = JSON.parse(storedUser);

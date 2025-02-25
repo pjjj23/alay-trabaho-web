@@ -71,7 +71,7 @@ export default function Home() {
 
       {/* Main Content */}
       <div className={`transition-all duration-500 ${isLoading ? 'blur-sm' : 'blur-0'}`}>
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+        <div className="min-h-screen bg-gradient-to-bl from-[#e3f2fd] to-[#9cd5ff]">
           {/* Navigation Bar */}
           <nav className="sticky top-0 z-40 backdrop-blur-md bg-white/80 border-b border-gray-100 transition-all duration-300 ease-in-out transform translate-y-0">
             <div className="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">

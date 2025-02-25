@@ -1,6 +1,17 @@
 "use client";
 import { useState, useEffect } from "react";
 import { updateRecruiter } from "@/api/UsersApi";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+    faHome,
+    faUser,
+    faLocationDot,
+    faRightFromBracket,
+    faPencil,
+    faCheck,
+    faTimes,
+    faCamera
+} from '@fortawesome/free-solid-svg-icons';
 
 const JobUpdateForm = () => {
   const [formData, setFormData] = useState({
@@ -25,14 +36,45 @@ const JobUpdateForm = () => {
   });
 
   const [showModal, setShowModal] = useState(false);
+  const [firstName, setFirstName] = useState<string | null>("");
   const [companyNameExists, setCompanyNameExists] = useState(false);
   const [loading, setLoading] = useState(true); // Add a loading state
-
+  const [showDropdown, setShowDropdown] = useState(false);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
   const hiringPositions = ["Software Engineer", "Data Analyst", "Project Manager", "Marketing Specialist"];
   const workSchedules = ["Full-Time", "Part-Time", "Contract", "Internship"];
   const workSetups = ["On-Site", "Remote", "Hybrid"];
   const experienceLevels = ["Entry-Level", "Mid-Level", "Senior-Level"];
 
+  
+      const LogoutModal = () => (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-96 transform transition-all duration-300">
+                  <FontAwesomeIcon icon={faRightFromBracket} className="w-4 h-4" />
+                  <h3 className="text-xl font-semibold mb-4">Confirm Logout</h3>
+                  <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
+                  <div className="flex justify-end gap-4">
+                      <button
+                          onClick={() => setShowLogoutModal(false)}
+                          className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-300"
+                      >
+                          Cancel
+                      </button>
+                      <button
+                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-300"
+                          onClick={() => {
+                              localStorage.clear(); // Clear user data
+                              window.location.href = "../AuthPages/LogIn"; // Redirect to login page
+                          }}
+                      >
+                          <FontAwesomeIcon icon={faRightFromBracket} className="w-4 h-4" />
+                          <span>Logout</span>
+                      </button>
+                  </div>
+              </div>
+          </div>
+      );
+  
   // Modal Component (Same as before - keep it)
   const Modal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
@@ -71,14 +113,20 @@ const JobUpdateForm = () => {
       setLoading(false);
       return;
     }
+    
   
     try {
       const userData = JSON.parse(storedUser);
+      
       if (!userData || !userData.email) {
         console.warn("User data in localStorage is invalid or missing email.");
         setLoading(false);
         return;
       }
+
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        setFirstName(userData.firstName || "User"); }
   
       const { email } = userData;
       console.log("Fetching CompanyName for email:", email); // Added log
@@ -179,6 +227,7 @@ const JobUpdateForm = () => {
     const response = await updateRecruiter(jobData); // Changed function call
     console.log("API Response:", response);
     alert("Job successfully updated!"); // Changed alert message
+    window.location.href = "../adminPages/dashboard";
     } catch (error: any) {
     console.error("Job Update API Error:", error); // Changed error message
     if (error.response) {
@@ -195,7 +244,68 @@ const JobUpdateForm = () => {
   }
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="min-h-screen bg-gradient-to-bl from-[#e3f2fd] to-[#9cd5ff]">
+      <header className="flex justify-between items-center px-8 py-5 bg-white fixed w-full shadow-sm z-10">
+                        <div className="flex items-center cursor-pointer group">
+                            <img
+                                src="/assets/img/Logo.png"
+                                alt="AlayTrabaho Logo"
+                                className="w-8 h-8 object-contain opacity-0 animate-fade-in mr-3"
+                            />
+                            <h1 className="text-2xl font-bold transition-transform duration-300 ease-in-out transform group-hover:scale-105">
+                                Alay<span className="text-blue-600">TRABAHO</span>
+                            </h1>
+                        </div>
+                        <div className="flex items-center">
+                            <span className="mr-10 text-gray-700 font-semibold">Hello, {firstName}!</span>
+                            <button
+                                className="p-2 rounded-full hover:bg-gray-100 transition-all duration-300"
+                                onClick={() => setShowDropdown(!showDropdown)}
+                            >
+                                <img
+                                    src="/assets/img/default-profileimg.png"
+                                    className="w-10 h-10 rounded-full top-4 right-8 absolute object-cover"
+                                />
+                            </button>
+        
+                            {showDropdown && (
+                                <div className="absolute right-0 top-16 w-56 bg-gray-800 rounded-lg shadow-lg py-2 transition-all duration-300">
+                                    <a href="../adminPages/dashboard">
+                                        <button className="w-full px-4 py-2 text-left hover:bg-gray-700 flex items-center gap-2">
+                                            <FontAwesomeIcon icon={faHome} className="w-4 h-4 text-white" />
+                                            <span className="text-white">Home</span>
+                                        </button>
+                                    </a>
+        
+                                    <a href="../adminPages/adminSettings">
+                                        <button className="w-full px-4 py-2 text-left hover:bg-gray-700 flex items-center gap-2">
+                                            <FontAwesomeIcon icon={faUser} className="w-4 h-4 text-white" />
+                                            <span className="text-white">Profile</span>
+                                        </button>
+                                    </a>
+        
+                                    <a href="../adminPages/savedLocation"><button className="w-full px-4 py-2 text-left hover:bg-gray-700 flex items-center gap-2">
+                                        <FontAwesomeIcon icon={faLocationDot} className="w-4 h-4 text-white" />
+                                        <span className="text-white">Save Location</span>
+                                    </button></a>
+        
+                                    <div className="border-t border-gray-200 my-1"></div>
+        
+                                    <button
+                                        className="w-full px-4 py-2 text-left hover:bg-gray-700 flex items-center gap-2 text-red-600"
+                                        onClick={() => {
+                                            setShowLogoutModal(true);
+                                            setShowDropdown(false);
+                                        }}
+                                    >
+                                        <FontAwesomeIcon icon={faRightFromBracket} className="w-4 h-4" />
+                                        <span>Logout</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </header>
+                    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Update Job Information</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
@@ -206,16 +316,7 @@ const JobUpdateForm = () => {
           placeholder="Company Name"
           required
           className="w-full p-2 border rounded"
-        />
-        <input
-          type="text"
-          name="CompanyLogo"
-          value={formData.CompanyLogo}
-          onChange={handleChange}
-          placeholder="Company Logo URL"
-          required
-          className="w-full p-2 border rounded"
-        />
+        /> 
         <textarea
           name="CompanyDescription"
           value={formData.CompanyDescription}
@@ -319,6 +420,7 @@ const JobUpdateForm = () => {
           Post Job
         </button>
       </form>
+      </div>
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} />
     </div>
   );
