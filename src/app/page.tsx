@@ -91,7 +91,7 @@ export default function Home() {
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
                 </button></a> 
                 <a href="Pages/AuthPages/SignUp"> <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-blue-300/50 transform hover:scale-105">
-                   Sign Up  
+                   Sign Up
                 </button></a> 
               </div>
             </div>
